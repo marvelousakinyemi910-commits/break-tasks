@@ -1,71 +1,53 @@
+package BankApp;
 import org.junit.jupiter.api.Test;
-
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AccountTest {
-    @Test
-    public void testThatBalanceIsZeroOnCreation() {
-        Account account = new Account("marve", "1234");
-        assertEquals(BigDecimal.ZERO, account.getBalance());
+class AccountTest {
 
+    @Test
+    void depositShouldIncreaseBalance() throws Exception {
+        NIBBS nibbs = new NIBBS();
+        Bank bank = new Bank("GTBank", "01",nibbs);
+        Account account = new Account("John", 1234, "1234", bank);
+
+        account.deposit(new BigDecimal("500"));
+
+        assertEquals(new BigDecimal("500"), account.checkBalance("1234"));
     }
 
     @Test
-    public void testThatI_deposit500AndBalanceIs500() {
-        Account account = new Account("marve", "1234");
-        account.deposit(BigDecimal.valueOf(500));
-        assertEquals(BigDecimal.valueOf(500), account.getBalance());
+    void withdrawShouldDecreaseBalance() throws Exception {
+        NIBBS nibbs = new NIBBS();
+        Bank bank = new Bank("GTBank", "01",nibbs);
+        Account account = new Account("John", 1234, "1234",bank);
+
+        account.deposit(new BigDecimal("1000"));
+        account.withdraw(new BigDecimal("400"), "1234");
+
+        assertEquals(new BigDecimal("600"), account.checkBalance("1234"));
     }
 
     @Test
-    public void testThatI_depositNegativeAmountAndBalanceIs500() {
-        Account account = new Account("marve", "1234");
-        account.deposit(BigDecimal.valueOf(500));
-        account.deposit(BigDecimal.valueOf(-500));
-        assertEquals(BigDecimal.valueOf(500), account.getBalance());
+    void wrongPinShouldThrowException() {
+        NIBBS nibbs = new NIBBS();
+        Bank bank = new Bank("GTBank", "01", nibbs);
+        Account account = new Account("Marve", 1234, "1234", bank);
 
+        assertThrows(InvalidPinException.class, () -> {
+            account.checkBalance("0000");
+        });
     }
 
     @Test
-    public void testThatI_deposit500AndWithdraw200_balanceIs500() {
-        Account account = new Account("marve", "1234");
-        account.deposit(BigDecimal.valueOf(500));
-        account.withdraw(BigDecimal.valueOf(200));
-        assertEquals(BigDecimal.valueOf(300), account.getBalance());
+    void insufficientFundsShouldThrowException() {
+        NIBBS nibbs = new NIBBS();
+        Bank bank = new Bank("GTBank", "01",nibbs);
+        Account account = new Account("Marve", 1234, "1234", bank);
 
+        assertThrows(InsufficientFundsException.class, () -> {
+            account.withdraw(new BigDecimal("1000"), "1234");
+        });
     }
-
-    @Test
-    public void testThatI_deposit500AndWithdraw1k_balanceIs500() {
-        Account account = new Account("marve", "1234");
-        account.deposit(BigDecimal.valueOf(500));
-        account.withdraw(BigDecimal.valueOf(1000));
-        assertEquals(BigDecimal.valueOf(500), account.getBalance());
-
-    }
-
-    @Test
-    public void testThatTheUserPinIsValid() {
-        Account account = new Account("marve", "1234");
-        assertTrue(account.isPin("1234"));
-    }
-
-    @Test
-    public void testThatTheUserPinContains_a_letter() {
-        Account account = new Account("marve", "1234");
-        assertFalse(account.isPin("123a"));
-
-    }
-
-    @Test
-    public void testThatTheUserPinLengthIsInvalid() {
-        Account account = new Account("marve", "1234");
-        assertFalse(account.isPin("12356"));
-
-
-    }
-    
 }
-
